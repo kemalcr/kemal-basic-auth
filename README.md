@@ -1,6 +1,6 @@
 # kemal-basic-auth
 
-Add basic auth to your [Kemal[http://github.com/kemalcr/kemal] application.
+Add basic auth to your [Kemal](http://github.com/kemalcr/kemal) application.
 
 ## Installation
 
@@ -19,14 +19,10 @@ dependencies:
 
 ```crystal
 require "kemal-basic-auth"
+
+basic_auth "username", "password"
 ```
 
-
-TODO: Write usage instructions here
-
-## Development
-
-TODO: Write development instructions here
 
 ## Contributing
 
