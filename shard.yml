@@ -1,0 +1,15 @@
+name: kemal-basic-auth
+version: 0.1.0
+
+development_dependencies:
+  kemal:
+    github: sdogruyol/kemal
+    branch: master
+
+authors:
+  - Serdar Dogruyol <dogruyolserdar@gmail.com>
+
+
+crystal: 0.20.0
+
+license: MIT
