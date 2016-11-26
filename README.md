@@ -34,4 +34,4 @@ basic_auth "username", "password"
 
 ## Contributors
 
-- [[sdogruyol]](https://github.com/[your-github-name]) Serdar Dogruyol - creator, maintainer
+- [sdogruyol](https://github.com/sdogruyol) Serdar Dogruyol - creator, maintainer
