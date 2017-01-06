@@ -9,7 +9,4 @@ development_dependencies:
 authors:
   - Serdar Dogruyol <dogruyolserdar@gmail.com>
 
-
-crystal: 0.20.0
-
 license: MIT

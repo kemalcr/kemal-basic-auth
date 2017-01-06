@@ -6,7 +6,8 @@ require "kemal"
 #
 # basic_auth "username", "password"
 #
-class HTTPBasicAuth < HTTP::Handler
+class HTTPBasicAuth
+  include HTTP::Handler
   BASIC                 = "Basic"
   AUTH                  = "Authorization"
   AUTH_MESSAGE          = "Could not verify your access level for that URL.\nYou have to login with proper credentials"
