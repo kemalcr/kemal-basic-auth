@@ -21,8 +21,20 @@ dependencies:
 require "kemal-basic-auth"
 
 basic_auth "username", "password"
+# basic_auth {"username1" => "password1", "username2" => "password2"}
 ```
 
+### `kemal_authorized_username`
+
+`HTTP::Server::Context#kemal_authorized_username?` is set when the user is authorized.
+
+```crystal
+basic_auth {"guest" => "123", "admin" => "xyz"}
+
+get "/" do |env|
+  "Hi, %s!" % env.kemal_authorized_username?
+end
+```
 
 ## Contributing
 
