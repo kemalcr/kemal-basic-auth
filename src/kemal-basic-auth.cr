@@ -20,7 +20,17 @@ class HTTPBasicAuth
   AUTH_MESSAGE          = "Could not verify your access level for that URL.\nYou have to login with proper credentials"
   HEADER_LOGIN_REQUIRED = "Basic realm=\"Login Required\""
 
-  def initialize(@credentials : Credentials)
+  # a lazy singleton instance which is automatically added to handler in first access
+  @@runtime : self?
+  def self.runtime
+    @@runtime ||= new.tap{|handler| add_handler handler}
+    @@runtime.not_nil!
+  end
+
+  getter credentials
+  delegate update, to: credentials
+
+  def initialize(@credentials : Credentials = Credentials.new)
   end
 
   # backward compatibility
@@ -51,15 +61,19 @@ class HTTPBasicAuth
 
   def authorize?(value) : String?
     username, password = Base64.decode_string(value[BASIC.size + 1..-1]).split(":")
+    authorize?(username, password)
+  end
+
+  def authorize?(username : String, password : String) : String?
     @credentials.authorize?(username, password)
   end
 end
 
 # Helper to easily add HTTP Basic Auth support.
 def basic_auth(username, password)
-  add_handler HTTPBasicAuth.new(username, password)
+  HTTPBasicAuth.runtime.update(username, password)
 end
 
 def basic_auth(crendentials : Hash(String, String))
-  add_handler HTTPBasicAuth.new(crendentials)
+  HTTPBasicAuth.runtime.update(crendentials)
 end

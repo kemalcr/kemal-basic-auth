@@ -36,6 +36,22 @@ get "/" do |env|
 end
 ```
 
+### accumulated entries
+
+When `basic_auth` is called in several times, the credentials are accumulated and shared by all pages.
+
+```crystal
+basic_auth "user1", "123"
+get "/members" do |env|
+  "restricted page" # both `user1` and `guest` can see this page.
+end
+
+basic_auth "guest", "temp"
+get "/trial" do |env|
+  "restricted page" # both `user1` and `guest` can see this page.
+end
+```
+
 ## Contributing
 
 1. Fork it ( https://github.com/kemalcr/kemal-basic-auth/fork )
