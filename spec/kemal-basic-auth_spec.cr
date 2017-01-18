@@ -28,8 +28,23 @@ describe "HTTPBasicAuth" do
     context.kemal_authorized_username?.should eq(nil)
   end
 
-  it "adds HTTPBasicAuthHandler" do
+  it "adds HTTPBasicAuthHandler at most once" do
     basic_auth "serdar", "123"
     Kemal.config.handlers.size.should eq 6
+
+    basic_auth "dogruyol", "abc"
+    Kemal.config.handlers.size.should eq 6
+  end
+
+  describe ".runtime" do
+    it "returns singleton instance" do
+      HTTPBasicAuth.runtime.should be_a(HTTPBasicAuth)
+    end
+
+    it "is affected by `basic_auth`" do
+      HTTPBasicAuth.runtime.authorize?("a", "1").should eq(nil)
+      basic_auth "a", "1"
+      HTTPBasicAuth.runtime.authorize?("a", "1").should eq("a")
+    end
   end
 end

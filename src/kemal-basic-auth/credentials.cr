@@ -1,6 +1,8 @@
-class HTTPBasicAuth
+class HTTPBasicAuth 
   class Credentials
-    def initialize(@entries : Hash(String, String) = Hash(String, String).new)
+    alias Entries = Hash(String, String)
+
+    def initialize(@entries : Entries = Entries.new)
     end
 
     def authorize?(username : String, password : String) : String?
@@ -9,6 +11,14 @@ class HTTPBasicAuth
       else
         nil
       end
+    end
+
+    def update(username : String, password : String)
+      @entries[username] = password
+    end
+
+    def update(other : Entries)
+      @entries.merge!(other)
     end
   end
 end
