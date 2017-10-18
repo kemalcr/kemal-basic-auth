@@ -1,5 +1,5 @@
 require "spec"
-require "../src/kemal-basic-auth"
+require "../src/kemal/basic_auth"
 
 def create_request_and_return_io_and_context(handler, request)
   io = IO::Memory.new

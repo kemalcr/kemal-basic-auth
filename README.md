@@ -18,7 +18,7 @@ dependencies:
 
 
 ```crystal
-require "kemal-basic-auth"
+require "kemal/basic_auth"
 
 basic_auth "username", "password"
 # basic_auth {"username1" => "password1", "username2" => "password2"}
