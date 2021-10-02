@@ -16,6 +16,9 @@ dependencies:
 
 ## Usage
 
+#### Basic example
+
+kemal-basic-auth adds authentication to all routes by default.
 
 ```crystal
 require "kemal-basic-auth"
@@ -24,7 +27,22 @@ basic_auth "username", "password"
 # basic_auth {"username1" => "password1", "username2" => "password2"}
 ```
 
-### `kemal_authorized_username`
+#### Authentication for specific routes
+
+`Kemal::BasicAuth::Handler` inherits from `Kemal::Handler` and it is therefore easy to create a custom handler that adds authentication to specific routes instead of all routes.
+
+```crystal
+class CustomAuthHandler < Kemal::BasicAuth::Handler
+  only ["/dashboard", "/admin"]
+
+  def call(context)
+    return call_next(context) unless only_match?(context)
+    super
+  end
+end
+```
+
+#### `kemal_authorized_username`
 
 `HTTP::Server::Context#kemal_authorized_username?` is set when the user is authorized.
 
