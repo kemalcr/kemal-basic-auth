@@ -41,6 +41,7 @@ class CustomAuthHandler < Kemal::BasicAuth::Handler
   end
 end
 ```
+Now just set `Kemal.config.auth_handler = CustomAuthHandler` and you are good to go.
 
 #### `kemal_authorized_username`
 

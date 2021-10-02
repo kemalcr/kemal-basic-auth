@@ -1,6 +1,6 @@
 require "./spec_helper"
 
-describe "HTTPBasicAuth" do
+describe "Kemal::BasicAuth" do
   it "goes to next handler with correct credentials" do
     auth_handler = Kemal::BasicAuth::Handler.new("serdar", "123")
     request = HTTP::Request.new(
