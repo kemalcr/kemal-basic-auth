@@ -1,6 +1,6 @@
 require "crypto/subtle"
 
-class HTTPBasicAuth
+module Kemal::BasicAuth
   class Credentials
     def initialize(@entries : Hash(String, String) = Hash(String, String).new)
     end
