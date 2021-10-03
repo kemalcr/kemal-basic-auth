@@ -1,6 +1,15 @@
 require "spec"
 require "../src/kemal-basic-auth"
 
+class SpecAuthHandler < Kemal::BasicAuth::Handler
+  only ["/admin"]
+
+  def call(context)
+    return call_next(context) unless only_match?(context)
+    super
+  end
+end
+
 def create_request_and_return_io_and_context(handler, request)
   io = IO::Memory.new
   response = HTTP::Server::Response.new(io)

@@ -6,7 +6,7 @@ describe "HTTPBasicAuth::Credentials" do
       "serdar"   => "12345",
       "dogruyol" => "abc",
     }
-    crendentials = HTTPBasicAuth::Credentials.new(entries)
+    crendentials = Kemal::BasicAuth::Credentials.new(entries)
 
     crendentials.authorize?("serdar", "12345").should eq("serdar")
     crendentials.authorize?("serdar", "xxx").should eq(nil)
