@@ -1,10 +1,9 @@
 name: kemal-basic-auth
-version: 1.0.0
+version: 1.0.1
 
 development_dependencies:
   kemal:
-    github: sdogruyol/kemal
-    branch: master
+    github: kemalcr/kemal
 
 authors:
   - Serdar Dogruyol <dogruyolserdar@gmail.com>
