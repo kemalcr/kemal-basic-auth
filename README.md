@@ -37,6 +37,48 @@ basic_auth "username", "password", realm: "My API"
 basic_auth({"admin" => "xyz"}, realm: "Admin Area", message: "Stop!")
 ```
 
+#### Hashed passwords with bcrypt
+
+For production credentials, store bcrypt hashes rather than plaintext:
+
+```crystal
+require "crypto/bcrypt/password"
+
+hash = Crypto::Bcrypt::Password.create("xyz").to_s
+verifier = Kemal::BasicAuth::BcryptVerifier.new({"admin" => hash})
+basic_auth verifier
+```
+
+#### Dynamic credentials (database, environment, ...)
+
+The block form lets you decide whether a username/password is valid at request
+time, e.g. by looking up a row in your database:
+
+```crystal
+basic_auth do |user, pass|
+  User.authenticate(user, pass)
+end
+
+# realm/message/rate_limiter can still be configured:
+basic_auth(realm: "My API") do |user, pass|
+  User.authenticate(user, pass)
+end
+```
+
+#### Throttling failed attempts
+
+A simple in-memory rate limiter can be attached to slow down brute-force
+attempts. The limiter keys off the request's remote address; once a threshold
+is reached the handler responds with `429 Too Many Requests` and a
+`Retry-After` header until the window elapses.
+
+```crystal
+limiter = Kemal::BasicAuth::RateLimiter.new(max_attempts: 5, window: 1.minute)
+basic_auth "username", "password", rate_limiter: limiter
+```
+
+A successful authentication clears the counter for that remote.
+
 #### Authentication for specific routes
 
 `Kemal::BasicAuth::Handler` inherits from `Kemal::Handler`. With the built-in
@@ -51,7 +93,8 @@ end
 Kemal.config.auth_handler = CustomAuthHandler
 ```
 
-`exclude` works the same way and can be combined with `only`:
+`exclude` works the same way and can be combined with `only` (`exclude` takes
+precedence):
 
 ```crystal
 class CustomAuthHandler < Kemal::BasicAuth::Handler
