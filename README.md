@@ -5,8 +5,12 @@ Add basic auth to your [Kemal](http://github.com/kemalcr/kemal) application.
 > Basic Auth sends credentials Base64-encoded (not encrypted). Always serve your
 > application over HTTPS in production to avoid leaking credentials.
 
-## Installation
+## Requirements
 
+- Crystal `>= 1.12.0`
+- Kemal `>= 1.0.0`
+
+## Installation
 
 Add this to your application's `shard.yml`:
 
@@ -14,6 +18,7 @@ Add this to your application's `shard.yml`:
 dependencies:
   kemal-basic-auth:
     github: kemalcr/kemal-basic-auth
+    version: ~> 2.0
 ```
 
 
@@ -126,6 +131,30 @@ get "/" do |env|
   "Hi, %s!" % env.kemal_authorized_username?
 end
 ```
+
+## Upgrading from 1.x
+
+Most applications upgrade with no source changes; the helper API
+(`basic_auth "user", "pass"`, `basic_auth({...})`) and the public
+`Kemal.config.auth_handler` extension point are unchanged.
+
+You may need to adjust if you:
+
+- **Subclassed `Kemal::BasicAuth::Handler` and accessed `@credentials`
+  directly.** The instance variable was renamed to `@verifier` because
+  the handler now accepts any `Kemal::BasicAuth::Verifier`. Use the
+  public `Verifier` API (or the `getter` if you add one) instead of
+  reaching into the field.
+- **Relied on `Kemal::BasicAuth::VERSION`.** This constant was removed.
+  Read the version from `shard.yml` if you need it.
+- **Depend on the exact failed-comparison timing of `Credentials`.**
+  The internal algorithm now uses SHA-256 length equalization. The
+  public `authorize?` contract is unchanged.
+
+The custom-handler override pattern documented in 1.x continues to
+work as-is, so existing subclasses do not need to change.
+
+See [CHANGELOG.md](CHANGELOG.md) for the full list of changes.
 
 ## Contributing
 
