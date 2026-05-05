@@ -1,4 +1,3 @@
-require "base64"
 require "kemal"
 require "./kemal-basic-auth/**"
 
@@ -12,6 +11,6 @@ def basic_auth(username : String, password : String)
   add_handler Kemal.config.auth_handler.new(username, password)
 end
 
-def basic_auth(crendentials : Hash(String, String))
-  add_handler Kemal.config.auth_handler.new(crendentials)
+def basic_auth(credentials : Hash(String, String))
+  add_handler Kemal.config.auth_handler.new(credentials)
 end
