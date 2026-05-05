@@ -4,7 +4,7 @@ module Kemal::BasicAuth
   # This middleware adds HTTP Basic Auth support to your application.
   # Returns 401 "Unauthorized" with wrong credentials.
   #
-  # ```crystal
+  # ```
   # basic_auth "username", "password"
   # # basic_auth {"username1" => "password1", "username2" => "password2"}
   # ```
@@ -16,21 +16,59 @@ module Kemal::BasicAuth
     BASIC_PREFIX          = "Basic "
     AUTH                  = "Authorization"
     AUTH_MESSAGE          = "Could not verify your access level for that URL.\nYou have to login with proper credentials"
-    HEADER_LOGIN_REQUIRED = "Basic realm=\"Login Required\""
+    DEFAULT_REALM         = "Login Required"
+    HEADER_LOGIN_REQUIRED = %(Basic realm="#{DEFAULT_REALM}")
 
-    def initialize(@credentials : Credentials)
+    # Tracks which subclasses configured `only`/`exclude` so the base `call`
+    # can decide whether to enforce path filtering automatically.
+    @@bauth_only_classes = Set(String).new
+    @@bauth_exclude_classes = Set(String).new
+
+    getter realm : String
+    getter message : String
+
+    def initialize(@verifier : Verifier, @realm : String = DEFAULT_REALM, @message : String = AUTH_MESSAGE)
     end
 
     # backward compatibility
-    def initialize(username : String, password : String)
-      initialize({username => password})
+    def initialize(username : String, password : String, realm : String = DEFAULT_REALM, message : String = AUTH_MESSAGE)
+      initialize(Credentials.new({username => password}), realm, message)
     end
 
-    def initialize(hash : Hash(String, String))
-      initialize(Credentials.new(hash))
+    def initialize(hash : Hash(String, String), realm : String = DEFAULT_REALM, message : String = AUTH_MESSAGE)
+      initialize(Credentials.new(hash), realm, message)
+    end
+
+    macro only(paths, method = "GET")
+      class_name = {{ @type.name }}
+      class_name_method = "#{class_name}/#{{{ method }}}"
+      ({{ paths }}).each do |path|
+        @@only_routes_tree.add class_name_method + path, '/' + {{ method }} + path
+      end
+      @@bauth_only_classes << {{ @type.name.stringify }}
+    end
+
+    macro exclude(paths, method = "GET")
+      class_name = {{ @type.name }}
+      class_name_method = "#{class_name}/#{{{ method }}}"
+      ({{ paths }}).each do |path|
+        @@exclude_routes_tree.add class_name_method + path, '/' + {{ method }} + path
+      end
+      @@bauth_exclude_classes << {{ @type.name.stringify }}
     end
 
     def call(context)
+      klass = self.class.name
+      if @@bauth_exclude_classes.includes?(klass) && exclude_match?(context)
+        return call_next(context)
+      end
+      if @@bauth_only_classes.includes?(klass) && !only_match?(context)
+        return call_next(context)
+      end
+      authenticate(context)
+    end
+
+    protected def authenticate(context)
       if (value = context.request.headers[AUTH]?) && value.starts_with?(BASIC_PREFIX)
         if username = authorize?(value)
           context.kemal_authorized_username = username
@@ -38,8 +76,8 @@ module Kemal::BasicAuth
         end
       end
       context.response.status_code = 401
-      context.response.headers["WWW-Authenticate"] = HEADER_LOGIN_REQUIRED
-      context.response.print AUTH_MESSAGE
+      context.response.headers["WWW-Authenticate"] = login_required_header
+      context.response.print @message
     end
 
     def authorize?(value) : String?
@@ -47,9 +85,14 @@ module Kemal::BasicAuth
       decoded = Base64.decode_string(encoded)
       username, separator, password = decoded.partition(":")
       return nil if separator.empty?
-      @credentials.authorize?(username, password)
+      @verifier.authorize?(username, password)
     rescue Base64::Error
       nil
+    end
+
+    private def login_required_header : String
+      safe_realm = @realm.gsub(/["\r\n]/, "")
+      %(Basic realm="#{safe_realm}")
     end
   end
 end

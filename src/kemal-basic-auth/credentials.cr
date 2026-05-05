@@ -1,13 +1,17 @@
 require "crypto/subtle"
+require "./verifier"
 
 module Kemal::BasicAuth
-  class Credentials
+  # Plaintext credentials verifier backed by a `Hash(String, String)`.
+  # Performs constant-time comparison and iterates all entries on every check
+  # to avoid leaking which usernames are valid via timing differences.
+  class Credentials < Verifier
     def initialize(@entries : Hash(String, String) = Hash(String, String).new)
     end
 
-    def authorize?(username : String, given_password : String) : String?
-      test_password = find_password(username, given_password)
-      if Crypto::Subtle.constant_time_compare(test_password, given_password)
+    def authorize?(username : String, password : String) : String?
+      test_password = find_password(username, password)
+      if Crypto::Subtle.constant_time_compare(test_password, password)
         username
       else
         nil

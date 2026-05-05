@@ -2,6 +2,9 @@
 
 Add basic auth to your [Kemal](http://github.com/kemalcr/kemal) application.
 
+> Basic Auth sends credentials Base64-encoded (not encrypted). Always serve your
+> application over HTTPS in production to avoid leaking credentials.
+
 ## Installation
 
 
@@ -24,12 +27,39 @@ kemal-basic-auth adds authentication to all routes by default.
 require "kemal-basic-auth"
 
 basic_auth "username", "password"
-# basic_auth {"username1" => "password1", "username2" => "password2"}
+# basic_auth({"username1" => "password1", "username2" => "password2"})
+```
+
+#### Customizing the realm and 401 body
+
+```crystal
+basic_auth "username", "password", realm: "My API"
+basic_auth({"admin" => "xyz"}, realm: "Admin Area", message: "Stop!")
 ```
 
 #### Authentication for specific routes
 
-`Kemal::BasicAuth::Handler` inherits from `Kemal::Handler` and it is therefore easy to create a custom handler that adds authentication to specific routes instead of all routes.
+`Kemal::BasicAuth::Handler` inherits from `Kemal::Handler`. With the built-in
+`only`/`exclude` macros the base handler automatically restricts authentication
+to those routes; you no longer have to override `call`.
+
+```crystal
+class CustomAuthHandler < Kemal::BasicAuth::Handler
+  only ["/dashboard", "/admin"]
+end
+
+Kemal.config.auth_handler = CustomAuthHandler
+```
+
+`exclude` works the same way and can be combined with `only`:
+
+```crystal
+class CustomAuthHandler < Kemal::BasicAuth::Handler
+  exclude ["/health", "/metrics"]
+end
+```
+
+The legacy manual override pattern from earlier versions still works:
 
 ```crystal
 class CustomAuthHandler < Kemal::BasicAuth::Handler
@@ -41,14 +71,13 @@ class CustomAuthHandler < Kemal::BasicAuth::Handler
   end
 end
 ```
-Now just set `Kemal.config.auth_handler = CustomAuthHandler` and you are good to go.
 
 #### `kemal_authorized_username`
 
 `HTTP::Server::Context#kemal_authorized_username?` is set when the user is authorized.
 
 ```crystal
-basic_auth {"guest" => "123", "admin" => "xyz"}
+basic_auth({"guest" => "123", "admin" => "xyz"})
 
 get "/" do |env|
   "Hi, %s!" % env.kemal_authorized_username?

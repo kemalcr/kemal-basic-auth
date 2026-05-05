@@ -7,10 +7,20 @@ module Kemal
 end
 
 # Helper to easily add HTTP Basic Auth support.
-def basic_auth(username : String, password : String)
-  add_handler Kemal.config.auth_handler.new(username, password)
+def basic_auth(username : String, password : String,
+               realm : String = Kemal::BasicAuth::Handler::DEFAULT_REALM,
+               message : String = Kemal::BasicAuth::Handler::AUTH_MESSAGE)
+  add_handler Kemal.config.auth_handler.new(username, password, realm, message)
 end
 
-def basic_auth(credentials : Hash(String, String))
-  add_handler Kemal.config.auth_handler.new(credentials)
+def basic_auth(credentials : Hash(String, String),
+               realm : String = Kemal::BasicAuth::Handler::DEFAULT_REALM,
+               message : String = Kemal::BasicAuth::Handler::AUTH_MESSAGE)
+  add_handler Kemal.config.auth_handler.new(credentials, realm, message)
+end
+
+def basic_auth(verifier : Kemal::BasicAuth::Verifier,
+               realm : String = Kemal::BasicAuth::Handler::DEFAULT_REALM,
+               message : String = Kemal::BasicAuth::Handler::AUTH_MESSAGE)
+  add_handler Kemal.config.auth_handler.new(verifier, realm, message)
 end
