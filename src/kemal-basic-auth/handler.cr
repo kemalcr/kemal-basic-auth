@@ -103,7 +103,7 @@ module Kemal::BasicAuth
       encoded = value[BASIC_PREFIX.size..-1].strip
       decoded = Base64.decode_string(encoded)
       username, separator, password = decoded.partition(":")
-      return nil if separator.empty?
+      return if separator.empty?
       @verifier.authorize?(username, password)
     rescue Base64::Error
       nil

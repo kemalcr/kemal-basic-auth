@@ -64,7 +64,7 @@ module Kemal::BasicAuth
     private def active_attempts(key : String) : Array(Time)
       list = @attempts[key] ||= [] of Time
       cutoff = @clock.call - @window
-      list.reject! { |t| t < cutoff }
+      list.reject! { |time| time < cutoff }
       list
     end
   end

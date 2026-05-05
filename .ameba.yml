@@ -1,0 +1,5 @@
+Excluded:
+  - lib/
+
+Documentation/DocumentationAdmonition:
+  Enabled: false
